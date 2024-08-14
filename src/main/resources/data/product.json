@@ -1,0 +1,58 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Iphone 12",
+      "price": 1000,
+      "discounted_price": 900,
+      "image": "iphone12.jpg",
+      "description": "New Iphone",
+      "category": "ELECTRONICS"
+    },
+    {
+      "id": 2,
+      "name": "Samsung Galaxy S21",
+      "price": 900,
+      "discounted_price": 800,
+      "image": "samsungs21.jpg",
+      "description": "New Samsung",
+      "category": "ELECTRONICS"
+    },
+    {
+      "id": 3,
+      "name": "Adidas T-shirt",
+      "price": 50,
+      "discounted_price": 40,
+      "image": "adidastshirt.jpg",
+      "description": "New Adidas T-shirt",
+      "category": "CLOTHING"
+    },
+    {
+      "id": 4,
+      "name": "Nike Shoes",
+      "price": 100,
+      "discounted_price": 90,
+      "image": "nikeshoes.jpg",
+      "description": "New Nike Shoes",
+      "category": "CLOTHING"
+    },
+    {
+      "id": 5,
+      "name": "Banh Mi",
+      "price": 5,
+      "discounted_price": 4,
+      "image": "banhmi.jpg",
+      "description": "New Banh Mi",
+      "category": "FOOD"
+    },
+    {
+      "id": 6,
+      "name": "Pho",
+      "price": 10,
+      "discounted_price": 9,
+      "image": "pho.jpg",
+      "description": "New Pho",
+      "category": "FOOD"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+### find all
+GET localhost:8085/api/products
+
+###find by id
+GET localhost:8085/api/products/1
+
+###create
+POST localhost:8085/api/products
+
+###update
+PUT localhost:8085/api/products/1
+
+###delete
+DELETE localhost:8085/api/products/1
