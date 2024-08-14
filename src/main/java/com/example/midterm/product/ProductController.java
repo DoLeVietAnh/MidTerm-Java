@@ -1,10 +1,13 @@
 package com.example.midterm.product;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +15,7 @@ import java.util.Optional;
 @RequestMapping("api/products")
 public class ProductController {
 
+    @Autowired
     private final ProductRepo productRepo;
 
     public ProductController(ProductRepo productRepo) {
@@ -19,8 +23,9 @@ public class ProductController {
     }
 
     @GetMapping("")
-    List<Product> getAllProducts() {
-        return productRepo.findAll();
+    ProductResponse getAllProducts() {
+        List<Product>  products = productRepo.findAll();
+        return new ProductResponse(products);
     }
 
     @GetMapping("/{id}")
@@ -32,9 +37,33 @@ public class ProductController {
         return product.get();
     }
 
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        List<String> categories = productRepo.getCategories();
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/name/{name}")
+    Product getProductByName(@PathVariable String name) {
+        Optional<Product> product = productRepo.getProductByName(name);
+        if(product.isEmpty()) {
+            throw new ProductNotFoundException();
+        }
+        return product.get();
+    }
+
+    @GetMapping("/price/{price}")
+    Product getProductByPrice(@PathVariable BigDecimal price) {
+        Optional<Product> product = productRepo.getProductByPrice(price);
+        if(product.isEmpty()) {
+            throw new ProductNotFoundException();
+        }
+        return product.get();
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    void addProduct(@Valid @RequestBody Product product) {
+    void addProduct(@RequestBody Product product) {
         productRepo.addProduct(product);
     }
 

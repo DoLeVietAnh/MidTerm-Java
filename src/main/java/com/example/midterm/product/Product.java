@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record Product(
-                      @NotNull Integer id,
+                      Integer id,
                       String name,
                       BigDecimal price,
                       BigDecimal discounted_price,

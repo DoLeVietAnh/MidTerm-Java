@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .actions button {
+            margin-right: 5px;
+        }
+
+        .form-container {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .form-container form {
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .form-container form label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .form-container form input,
+        .form-container form select,
+        .form-container form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form-container form button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            background-color: #28a745;
+        }
+
+        .form-container form button:hover {
+            background-color: #218838;
+        }
+
+        .form-container form .cancel {
+            background-color: #dc3545;
+        }
+
+        .form-container form .cancel:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Product Management</h1>
+    <button id="show-add-form">Add New Product</button>
+    <div class="form-container" id="add-product-form">
+        <h2>Add Product</h2>
+        <form id="product-form">
+            <label for="id"></label>
+            <input type="number" id="id" name="id" hidden>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="price">Price:</label>
+            <input type="number" id="price" name="price" required>
+            <label for="discountedPrice">Discount Price:</label>
+            <input type="number" id="discountedPrice" name="discountPrice">
+            <label for="image">Image URL:</label>
+            <input type="text" id="image" name="image">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description"></textarea>
+            <label for="category">Category:</label>
+            <select id="category" name="category" required>
+                <!-- Categories will be populated here -->
+            </select>
+            <button type="submit">Add Product</button>
+            <button type="button" class="cancel" id="cancel-add">Cancel</button>
+        </form>
+    </div>
+
+    <table id="products-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Discount Price</th>
+            <th>Image</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="product-list">
+        <!-- Product rows will be populated here -->
+        </tbody>
+    </table>
+
+    <div id="updateDiv" style="display: none">
+        <h2>Edit Product</h2>
+        <form id="updateForm">
+            <label for="id">Id: </label>
+            <input type="number" id="updateId" name="id" readonly>
+            <label for="name">Name:</label>
+            <input type="text" id="updateName" name="name" required>
+            <label for="price">Price:</label>
+            <input type="number" id="updatePrice" name="price" required>
+            <label for="discountedPrice">Discount Price:</label>
+            <input type="number" id="updateDiscountedPrice" name="discountPrice">
+            <label for="image">Image URL:</label>
+            <input type="text" id="updateImage" name="image">
+            <label for="description">Description:</label>
+            <textarea id="updateDescription" name="description"></textarea>
+            <label for="category">Category:</label>
+            <select id="updateCategory" name="category" required>
+
+            </select>
+            <button type="submit">Update Product</button>
+            <button type="button" class="cancel" id="cancel-update">Cancel</button>
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const table = $('#products-table').DataTable({
+            ajax: {
+                url: '/api/products',
+                type: 'GET',
+                dataSrc: 'content'
+            },
+            columns: [
+                {data: 'id'},
+                {data: 'name'},
+                {data: 'price'},
+                {data: 'discounted_price'},
+                {data: 'image', render: data => `<img src="${data}" width="50" alt="product"/>`},
+                {data: 'description'},
+                {data: 'category'},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return `
+                          <button onclick="editProduct(${row.id})">Edit</button>
+                          <button onclick="deleteProduct(${row.id})">Delete</button>
+                      `;
+                    }
+                }
+            ]
+        });
+
+        // Load categories for the form
+        $.get('/api/products/categories', function(categories) {
+            const categorySelect = $('#category');
+            categories.forEach(category => {
+                categorySelect.append(`<option value="${category.id}">${category.name}</option>`);
+            });
+        });
+
+
+
+        $('#show-add-form').click(function () {
+            $('#add-product-form').show();
+        });
+
+        $('#cancel-add').click(function () {
+            $('#add-product-form').hide();
+        });
+
+        $('#product-form').submit(function (event) {
+            event.preventDefault();
+            const formData = $(this).serialize();
+            $.post('/api/products', formData, function () {
+                $('#add-product-form').hide();
+                table.ajax.reload();
+            });
+        });
+
+        window.editProduct = function (id) {
+            $.ajax({
+                url: `/api/products/${id}`,
+                type: 'GET',
+                success: function (product) {
+                    // Populate the form with the product's current details
+                    $('#updateId').val(product.id);
+                    $('#updateName').val(product.name);
+                    $('#updatePrice').val(product.price);
+                    $('#updateDiscountedPrice').val(product.discounted_price);
+                    $('#updateImage').val(product.image);
+                    $('#updateDescription').val(product.description);
+
+                    // Populate the category select dropdown
+                    $('#updateCategory').empty(); // Clear existing options
+                    $.get('/api/products/categories', function (categories) {
+                        categories.forEach(category => {
+                            $('#updateCategory').append(`<option value="${category}">${category}</option>`);
+                        });
+                        $('#updateCategory').val(product.category); // Set the current category
+                    });
+
+                    // Show the updateDiv
+                    $('#updateDiv').show();
+                }
+            });
+        };
+
+        $('#updateForm').submit(function (event) {
+            event.preventDefault();
+            const id = $('#updateId').val(); // Get the product ID from the form field
+            const formData = $(this).serialize();
+            $.ajax({
+                url: `/api/products/${id}`,
+                type: 'PUT',
+                data: formData,
+                success: function () {
+                    $('#updateDiv').hide();
+                    table.ajax.reload();
+                },
+                error: function(xhr) {
+                    console.error("Update failed:", xhr.responseText);
+                }
+            });
+        });
+
+        // Hide the updateDiv when the 'Cancel' button is clicked
+        $('#cancel-update').click(function () {
+            $('#updateDiv').hide();
+        });
+
+        window.deleteProduct = function(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                $.ajax({
+                    url: `/api/products/${id}`,
+                    type: 'DELETE',
+                    success: function() {
+                        table.ajax.reload();
+                    }
+                });
+            }
+        };
+    });
+</script>
+
+</body>
+</html>

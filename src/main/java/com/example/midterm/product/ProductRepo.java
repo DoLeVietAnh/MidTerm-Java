@@ -2,10 +2,12 @@ package com.example.midterm.product;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,9 +16,11 @@ import java.util.Optional;
 public class ProductRepo {
     private List<Product> productList = new ArrayList<>();
     private final JdbcClient jdbcClient;
+    private final JdbcTemplate jdbcTemplate;
 
-    public ProductRepo(JdbcClient jdbcClient) {
+    public ProductRepo(JdbcClient jdbcClient, JdbcTemplate jdbcTemplate) {
         this.jdbcClient = jdbcClient;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<Product> findAll() {
@@ -25,9 +29,28 @@ public class ProductRepo {
                 .list();
     }
 
+    public List<String> getCategories() {
+        String sql = "SELECT DISTINCT category FROM Product";
+        return jdbcTemplate.queryForList(sql, String.class);
+    }
+
     public Optional<Product> getProductById(Integer id) {
         return jdbcClient.sql("SELECT * FROM Product WHERE id = :id")
                 .param("id", id)
+                .query(Product.class)
+                .optional();
+    }
+
+    public Optional<Product> getProductByName(String name) {
+        return jdbcClient.sql("SELECT * FROM Product WHERE name = :name")
+                .param("name", name)
+                .query(Product.class)
+                .optional();
+    }
+
+    public Optional<Product> getProductByPrice(BigDecimal price) {
+        return jdbcClient.sql("SELECT * FROM Product WHERE price = :price")
+                .param("price", price)
                 .query(Product.class)
                 .optional();
     }
