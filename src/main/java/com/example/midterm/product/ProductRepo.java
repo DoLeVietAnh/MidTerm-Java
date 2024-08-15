@@ -56,8 +56,8 @@ public class ProductRepo {
     }
 
     public void addProduct(Product product) {
-        var updated = jdbcClient.sql("INSERT INTO Product (name, price, discounted_price, image, description, category) VALUES (?,?,?,?,?,?)")
-                .params(product.name(), product.price(), product.discounted_price(), product.image(), product.description(), product.category().name())
+        var updated = jdbcClient.sql("INSERT INTO Product (id, name, price, discounted_price, image, description, category) VALUES (?,?,?,?,?,?,?)")
+                .params(product.id(),product.name(), product.price(), product.discounted_price(), product.image(), product.description(), product.category().name())
                 .update();
 
         Assert.state(updated == 1, "Failed to create product: " + product.name());
