@@ -94,8 +94,8 @@
     <div class="form-container" id="add-product-form">
         <h2>Add Product</h2>
         <form id="product-form">
-            <label for="id"></label>
-            <input type="number" id="id" name="id" hidden>
+            <label for="id">ID:</label>
+            <input type="number" id="id" name="id" required>
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" required>
             <label for="price">Price:</label>
@@ -143,7 +143,7 @@
             <label for="price">Price:</label>
             <input type="number" id="updatePrice" name="price" required>
             <label for="discountedPrice">Discount Price:</label>
-            <input type="number" id="updateDiscountedPrice" name="discountPrice">
+            <input type="number" id="updateDiscountedPrice" name="discountedPrice">
             <label for="image">Image URL:</label>
             <input type="text" id="updateImage" name="image">
             <label for="description">Description:</label>
@@ -154,6 +154,7 @@
             </select>
             <button type="submit">Update Product</button>
             <button type="button" class="cancel" id="cancel-update">Cancel</button>
+        </form>
     </div>
 
 </div>
@@ -190,12 +191,12 @@
 
         // Load categories for the form
         $.get('/api/products/categories', function(categories) {
-            const categorySelect = $('#category');
+            console.log(categories)
+            $('#category').empty(); // Clear existing options
             categories.forEach(category => {
-                categorySelect.append(`<option value="${category.id}">${category.name}</option>`);
+                $('#category').append(`<option value="${category}">${category}</option>`);
             });
         });
-
 
 
         $('#show-add-form').click(function () {
@@ -208,12 +209,34 @@
 
         $('#product-form').submit(function (event) {
             event.preventDefault();
-            const formData = $(this).serialize();
-            $.post('/api/products', formData, function () {
-                $('#add-product-form').hide();
-                table.ajax.reload();
+
+            // // Convert form data to an object
+            const formData = {
+                id: $('#id').val(),
+                name: $('#name').val(),
+                price: $('#price').val(),
+                discounted_price: $('#discountedPrice').val(),
+                image: $('#image').val(),
+                description: $('#description').val(),
+                category: $('#category').val(),
+            };
+
+            // Send the data as JSON
+            $.ajax({
+                url: '/api/products',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function () {
+                    $('#add-product-form').hide();
+                    table.ajax.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', status, error);
+                }
             });
         });
+
 
         window.editProduct = function (id) {
             $.ajax({
@@ -250,7 +273,8 @@
             $.ajax({
                 url: `/api/products/${id}`,
                 type: 'PUT',
-                data: formData,
+                contentType:'application/json',
+                data: JSON.stringify(formData),
                 success: function () {
                     $('#updateDiv').hide();
                     table.ajax.reload();
